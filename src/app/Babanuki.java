@@ -11,13 +11,12 @@ import java.util.List;
 import common.CardConst;
 import util.GameInterface; //GameInterfaceのメソッド
 import util.Result;
-import util.TrumpApplication; //.TrumpApplicationのメソッド
 
 /**
  * ババ抜きゲーム
  * @author K Kawamura
  */
-public class Babanuki extends TrumpApplication implements GameInterface  {//TrumpApplicationを継承　GameInterfaceをオーバーライド
+public class Babanuki implements GameInterface  {// GameInterfaceをオーバーライド
 	private List<String> userCards;
 	private List<String> comCards;
 
@@ -73,13 +72,8 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 
 		System.out.print("カード精査中...");
 		userCards = clearCards(userCards);
-		try {
-			// 1秒間、実行を停止する
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// 本課題では例外時の処理を考慮しない
-			e.printStackTrace();
-		}
+		// 1秒間処理を止める
+		waitProcess();
 		System.out.println(CardConst.MSG_FINISHED);
 		// 手札を表示する
 		printCards(userCards);
@@ -111,44 +105,22 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 			// 手札を表示
 			printCards(userCards);
 		}
-		if(flag == 0) {
-			System.out.println(CardConst.MSG_WIN);
-		} else {
-			System.out.println(CardConst.MSG_LOSE);
-		}
-		System.out.println(CardConst.MSG_GAME_END);
-
-		String message = r.getGameResults(CardConst.GAME_RESULT_FILE);
-		if(message == null) {
-			if(flag == 0) {
-				message = "1勝0敗";
-			} else {
-				message = "0勝1敗";
-			}
-		} else {
-			// X勝Y敗 を X,Yに分断する
-            String[] results = message.split("勝|敗");
-            int winCount = Integer.parseInt(results[0]);
-            int looseCount = Integer.parseInt(results[1]);
-
-			if(flag == 0) {
-				winCount++; // 勝った場合
-			} else {
-				looseCount++; // 負けた場合
-			}
-
-			StringBuilder resultMsg = new StringBuilder();
-			resultMsg.append(winCount);
-			resultMsg.append("勝");
-			resultMsg.append(looseCount);
-			resultMsg.append("敗");
-			message = resultMsg.toString();
-
-		}
-		//ファイルに書き込む
-		r.setGameResults(CardConst.GAME_RESULT_FILE, message);
+		// TODO 結果をファイルに書き出す
+		r.printResult(flag);
 	}
 	
+	/**
+	 * １秒間処理をストップ
+	 */
+	private void waitProcess() {
+		try {
+			// 1秒間、実行を停止する
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// 本課題では例外時の処理を考慮しない
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * アプリケーションの起動メッセージを表す文字列を返します。
 	 * @param version バージョン
@@ -196,13 +168,9 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 			// ジョーカーの位置を変更するためにシャッフルする
 			Collections.shuffle(comCards);
 		}
-		try {
-			// 1秒間、実行を停止する
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// 本課題では例外時の処理を考慮しない
-			e.printStackTrace();
-		}
+
+		// 1秒間処理を止める
+		waitProcess();
 		System.out.println(CardConst.MSG_FINISHED);
 	}
 	/**
@@ -306,13 +274,9 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 		System.out.println(CardConst.MSG_SELECT_CARD);
 		int selected =  (int) (Math.random() * userCards.size());
 		String selectedCard = userCards.get(selected);
-		try {
-			// 1秒間、実行を停止する
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// 本課題では例外時の処理を考慮しない
-			e.printStackTrace();
-		}
+
+		// 1秒間処理を止める
+		waitProcess();
 		System.out.println(CardConst.MSG_FINISHED);
 		userCards.remove(selected);
 		comCards.add(selectedCard);

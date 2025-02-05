@@ -46,7 +46,7 @@ public final class CardConst {
 	/** 表示メッセージ：ゲーム開始時メッセージ。 */
 	public static final String MSG_GAME_START = "Starting Game Application.";
 	/** 表示メッセージ：ゲーム終了時メッセージ。 */
-	public static final String MSG_GAME_END = "Endinßg Game Application.";
+	public static final String MSG_GAME_END = "Ending Game Application.";
 	/** 表示メッセージ：ババ抜き開始時メッセージ。 */
 	public static final String MSG_BABANUKI_START = "これよりトランプゲーム【ババ抜き】を開始します";
 

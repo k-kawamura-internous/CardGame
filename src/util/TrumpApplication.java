@@ -4,7 +4,7 @@ import app.Babanuki;
 
 /**
  * トランプゲーム用の起動クラス。
- * @author  K　Kawamura
+ * @author  K Kawamura
  */
 public class TrumpApplication {
 	/**
