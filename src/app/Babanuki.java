@@ -10,6 +10,7 @@ import java.util.List;
 
 import common.CardConst;
 import util.GameInterface; //GameInterfaceのメソッド
+import util.Result;
 import util.TrumpApplication; //.TrumpApplicationのメソッド
 
 /**
@@ -24,7 +25,7 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 	@Override
 	public void execute() {
 		// アプリケーションの起動メッセージの表示
-		String startMsg = startMsg("1.0");
+		String startMsg = createStartMsg("1.0");
 		System.out.println(startMsg);
 
 		String line = null;
@@ -47,7 +48,8 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 			} else if("2".equals(line)) {
 				// 2を選択された場合
 				System.out.println(CardConst.MSG_SEE_RESULTS);
-				String message = getGameResults(CardConst.GAME_RESULT_FILE);
+				Result r = new Result();
+				String message = r.getGameResults(CardConst.GAME_RESULT_FILE);
 				System.out.println(message);
 
 			} else {
@@ -61,9 +63,115 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 
 	@Override
 	public void game() {
-		System.out.println(CardConst.GAME_START_MSG);
-		System.out.println("これよりトランプゲーム【ババ抜き】を開始します");
-		System.out.print("カード配布中...");
+		System.out.println(CardConst.MSG_GAME_START);
+		System.out.println(CardConst.MSG_BABANUKI_START);
+		
+		// トランプを配る
+		handOutTrump();
+		// 手札を表示する
+		printCards(userCards);
+
+		System.out.print("カード精査中...");
+		userCards = clearCards(userCards);
+		try {
+			// 1秒間、実行を停止する
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// 本課題では例外時の処理を考慮しない
+			e.printStackTrace();
+		}
+		System.out.println(CardConst.MSG_FINISHED);
+		// 手札を表示する
+		printCards(userCards);
+
+		// COMのカードを精査する
+		comCards = clearCards(comCards);
+		Result r = new Result();
+		int flag = -1;
+		while(true) {
+			// ユーザーのターン
+			userTurn();
+			// 勝敗をチェック
+			flag = r.checkResult(userCards, comCards);
+			if(flag == 0 || flag == 1) {
+				// 勝敗が決定したのでループから抜ける
+				break;
+			}
+			// 手札を表示
+			printCards(userCards);
+
+			// COMのターン
+			comTurn();
+			// 勝敗をチェック
+			flag = r.checkResult(userCards, comCards);
+			if(flag == 0 || flag == 1) {
+				// 勝敗が決定したのでループから抜ける
+				break;
+			}
+			// 手札を表示
+			printCards(userCards);
+		}
+		if(flag == 0) {
+			System.out.println(CardConst.MSG_WIN);
+		} else {
+			System.out.println(CardConst.MSG_LOSE);
+		}
+		System.out.println(CardConst.MSG_GAME_END);
+
+		String message = r.getGameResults(CardConst.GAME_RESULT_FILE);
+		if(message == null) {
+			if(flag == 0) {
+				message = "1勝0敗";
+			} else {
+				message = "0勝1敗";
+			}
+		} else {
+			// X勝Y敗 を X,Yに分断する
+            String[] results = message.split("勝|敗");
+            int winCount = Integer.parseInt(results[0]);
+            int looseCount = Integer.parseInt(results[1]);
+
+			if(flag == 0) {
+				winCount++; // 勝った場合
+			} else {
+				looseCount++; // 負けた場合
+			}
+
+			StringBuilder resultMsg = new StringBuilder();
+			resultMsg.append(winCount);
+			resultMsg.append("勝");
+			resultMsg.append(looseCount);
+			resultMsg.append("敗");
+			message = resultMsg.toString();
+
+		}
+		//ファイルに書き込む
+		r.setGameResults(CardConst.GAME_RESULT_FILE, message);
+	}
+	
+	/**
+	 * アプリケーションの起動メッセージを表す文字列を返します。
+	 * @param version バージョン
+	 * @return 起動メッセージ
+	 */
+	private String createStartMsg(String version) {
+		StringBuilder startMsg = new StringBuilder();
+		startMsg.append(CardConst.MSG_APP_START);
+		startMsg.append("\n");
+		startMsg.append(CardConst.MSG_APP_START_1);
+		startMsg.append("\n");
+		startMsg.append(CardConst.MSG_APP_START_2);
+		startMsg.append("\n");
+		startMsg.append(CardConst.MSG_APP_START_3);
+		startMsg.append("\n");
+		return startMsg.toString();
+	}
+
+	/**
+	 * トランプをユーザーとCOMに配布する。
+	 */
+	private void handOutTrump() {
+		System.out.print(CardConst.MSG_CARD_HAND_OUT);
 		// 配列を1次元にフラット化
 		List<String> cards = new ArrayList<String>();
 		for (String[] suit : CardConst.CARD_TRUMP) {
@@ -95,88 +203,8 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 			// 本課題では例外時の処理を考慮しない
 			e.printStackTrace();
 		}
-		System.out.println("完了");
-		// 手札を表示する
-		printCards(userCards);
-
-		System.out.print("カード精査中...");
-		userCards = clearCards(userCards);
-		try {
-			// 1秒間、実行を停止する
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// 本課題では例外時の処理を考慮しない
-			e.printStackTrace();
-		}
-		System.out.println("完了");
-		// 手札を表示する
-		printCards(userCards);
-
-		// COMのカードを精査する
-		comCards = clearCards(comCards);
-
-		int flag = -1;
-		while(true) {
-			// ユーザーのターン
-			userTurn();
-			// 勝敗をチェック
-			flag = checkResult();
-			if(flag == 0 || flag == 1) {
-				// 勝敗が決定したのでループから抜ける
-				break;
-			}
-			// 手札を表示
-			printCards(userCards);
-
-			// COMのターン
-			comTurn();
-			// 勝敗をチェック
-			flag = checkResult();
-			if(flag == 0 || flag == 1) {
-				// 勝敗が決定したのでループから抜ける
-				break;
-			}
-			// 手札を表示
-			printCards(userCards);
-		}
-		if(flag == 0) {
-			System.out.println(CardConst.WIN_MSG);
-		} else {
-			System.out.println(CardConst.LOSE_MSG);
-		}
-		System.out.println(CardConst.GAME_END_MSG);
-
-		String message = getGameResults(CardConst.GAME_RESULT_FILE);
-		if(message == null) {
-			if(flag == 0) {
-				message = "1勝0敗";
-			} else {
-				message = "0勝1敗";
-			}
-		} else {
-			// X勝Y敗 を X,Yに分断する
-            String[] results = message.split("勝|敗");
-            int winCount = Integer.parseInt(results[0]);
-            int looseCount = Integer.parseInt(results[1]);
-
-			if(flag == 0) {
-				winCount++; // 勝った場合
-			} else {
-				looseCount++; // 負けた場合
-			}
-
-			StringBuilder resultMsg = new StringBuilder();
-			resultMsg.append(winCount);
-			resultMsg.append("勝");
-			resultMsg.append(looseCount);
-			resultMsg.append("敗");
-			message = resultMsg.toString();
-
-		}
-		//ファイルに書き込む
-		setGameResults(CardConst.GAME_RESULT_FILE, message);
+		System.out.println(CardConst.MSG_FINISHED);
 	}
-
 	/**
 	 * カードを精査する（重複を削除する）
 	 * @param cards 手札
@@ -233,52 +261,9 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 	 * ユーザーのターン
 	 */
 	private void userTurn() {
-		System.out.println(CardConst.TURN_MSG_USER);
-		System.out.println("COM側のカード番号を選択してください");
-		StringBuilder selectCardMsg = new StringBuilder();
-		for(int i=0; i<comCards.size(); i++) {
-			if(i < 9) {
-				selectCardMsg.append("+-----+ ");
-			} else {
-				selectCardMsg.append("+------+ ");	
-			}
-		}
-		selectCardMsg.append("\n");
-		for(int i=0; i<comCards.size(); i++) {
-			if(i < 9) {
-				selectCardMsg.append("|     | ");
-				
-			} else {
-				selectCardMsg.append("|      | ");
-			}
-		}
-		selectCardMsg.append("\n");
-		for(int i=0; i<comCards.size(); i++) {
-			if(i < 9) {
-				selectCardMsg.append("|  " + (i+1) + "  | "); 
-			} else {
-				selectCardMsg.append("|  " + (i+1) + "  | "); 
-			}
-		}
-		selectCardMsg.append("\n");
-		for(int i=0; i<comCards.size(); i++) {
-			if(i < 9) {
-				selectCardMsg.append("|     | ");
-				
-			} else {
-				selectCardMsg.append("|      | ");
-			}
-		}
-		selectCardMsg.append("\n");
-		for(int i=0; i<comCards.size(); i++) {
-			if(i < 9) {
-				selectCardMsg.append("+-----+ ");
-			} else {
-				selectCardMsg.append("+------+ ");	
-			}
-		}
-		selectCardMsg.append("\n");
-		System.out.println(selectCardMsg.toString());
+		System.out.println(CardConst.MSG_TURN_USER);
+		// COMの手札の一覧を生成し、表示する
+		printCOMCardsList();
 		
 
 		String line = null;
@@ -296,9 +281,10 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 				selected = Integer.parseInt(line);
 				if(list.contains(selected)) {
 					break;
-				} else {
-					System.out.println("1～" + comCards.size() + "の数字で指定してください");
 				}
+				String msg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
+				System.out.println(msg);
+				
 			}
 		} catch (IOException e) {
 			// 本課題では例外時の処理を考慮しない
@@ -316,8 +302,8 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 	 * COMのターン
 	 */
 	private void comTurn() {
-		System.out.println(CardConst.TURN_MSG_COM);
-		System.out.println("カード選択中...");
+		System.out.println(CardConst.MSG_TURN_COM);
+		System.out.println(CardConst.MSG_SELECT_CARD);
 		int selected =  (int) (Math.random() * userCards.size());
 		String selectedCard = userCards.get(selected);
 		try {
@@ -327,7 +313,7 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 			// 本課題では例外時の処理を考慮しない
 			e.printStackTrace();
 		}
-		System.out.println("完了");
+		System.out.println(CardConst.MSG_FINISHED);
 		userCards.remove(selected);
 		comCards.add(selectedCard);
 		
@@ -335,20 +321,43 @@ public class Babanuki extends TrumpApplication implements GameInterface  {//Trum
 		comCards = clearCards(comCards);
 		Collections.shuffle(comCards);
 	}
-
+	
 	/**
-	 * 勝敗を判定
-	 * @return 0:ユーザーの勝ち、1:COMの勝ち、−1:まだ勝敗がついていない
+	 * COMの手札の一覧を作成
+	 * @return メッセージ
 	 */
-	private int checkResult() {
-		if(userCards.size() == 0) {
-			return 0; // ユーザーが勝ちと記録
-		}
+	private void printCOMCardsList() {
 
-		if(comCards.size() == 0) {
-			return 1; // COMが勝ちと記録
+		System.out.println(CardConst.MSG_SLECT_COM_CARD);
+		// 手札の一覧を生成
+		StringBuilder comCardsList = new StringBuilder();
+		for (int i = 0; i < comCards.size(); i++) {
+			comCardsList.append("+----+ ");
 		}
-		return -1; // まだどちらも手札が残っている
+		comCardsList.append("\n");
+
+		for (int i = 0; i < comCards.size(); i++) {
+			comCardsList.append("|    | ");
+		}
+		comCardsList.append("\n");
+
+		for (int i = 0; i < comCards.size(); i++) {
+			// 数字を中央揃えにするために3桁分のスペースを確保してフォーマット
+		    comCardsList.append(String.format("| %2d | ", i + 1));  // 右揃えを使用して中央に表示される
+		}
+		comCardsList.append("\n");
+
+		for (int i = 0; i < comCards.size(); i++) {
+			comCardsList.append("|    | ");
+		}
+		comCardsList.append("\n");
+
+		for (int i = 0; i < comCards.size(); i++) {
+			comCardsList.append("+----+ ");
+		}
+		comCardsList.append("\n");
+		
+		// 手札の一覧を表示する
+		System.out.println(comCardsList.toString());
 	}
-
 }
