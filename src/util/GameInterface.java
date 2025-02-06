@@ -8,12 +8,12 @@ package util;
 public interface GameInterface {
 
 	/**
-	 * カードゲームのメイン処理です。
+	 * カードゲームのメイン処理。
 	 */
 	abstract void execute();
 
 	/**
-	 * ババ抜きゲーム処理を行います。
+	 * ババ抜きゲーム処理を行う。
 	 */
 	abstract void game();
 }

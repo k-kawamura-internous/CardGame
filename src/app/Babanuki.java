@@ -13,7 +13,7 @@ import util.GameInterface; //GameInterfaceのメソッド
 import util.Result;
 
 /**
- * ババ抜きゲーム
+ * ババ抜きゲーム。
  * @author K Kawamura
  */
 public class Babanuki implements GameInterface  {// GameInterfaceをオーバーライド
@@ -24,9 +24,102 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	@Override
 	public void execute() {
 		// アプリケーションの起動メッセージの表示
-		String startMsg = createStartMsg("1.0");
+		String startMsg = createStartMsg();
 		System.out.println(startMsg);
 
+		// ユーザーのメニュー選択を処理
+		String line = handleMenuSelection();
+		// 入力された選択に応じて処理を分岐
+		if ("1".equals(line)) {
+			// ゲームを開始
+			handleGameStart();
+		} else if ("2".equals(line)) {
+			// 結果を表示
+			handleResults();
+		} else {
+			// それ以外（3を選択された場合）
+			System.out.println(CardConst.MSG_EXIT_AP);
+		}
+	}
+
+	@Override
+	public void game() {
+		System.out.println(CardConst.MSG_GAME_START);
+		System.out.println(CardConst.MSG_BABANUKI_START);
+
+		// カードを配る
+		dealCards();
+
+		Result r = new Result();
+
+		// ゲームが終わるまでターンを繰り返す
+		while (true) {
+			// プレイヤーとコンピュータのターンを処理
+			playTurn(r);
+
+			// 勝敗判定
+			if (checkGameOver(r)) {
+				break;
+			}
+		}
+
+		// 結果をファイルに書き出す
+		r.printResult(r.checkResult(userCards, comCards));
+	}
+
+	/**
+	 * 勝敗判定
+	 * @param r 結果クラス
+	 * @return 勝敗
+	 */
+	private boolean checkGameOver(Result r) {
+		int flag = r.checkResult(userCards, comCards);
+	    return flag == 0 || flag == 1;
+	}
+
+	/**
+	 * // プレイヤーとコンピュータのターンを処理
+	 * @param r 結果クラス
+	 */
+	private void playTurn(Result r) {
+		// ユーザーのターン
+		userTurn(r);
+		// 手札を表示
+		printCards(userCards);
+
+		// COMのターン
+		comTurn(r);
+		// 手札を表示
+		printCards(userCards);
+	}
+
+	/**
+	 * カードを配る。
+	 */
+	private void dealCards() {
+		// トランプを配る
+		handOutTrump();
+		// 手札を表示する
+		printCards(userCards);
+
+		System.out.print(CardConst.MSG_CLEAR_CARD);
+		userCards = clearCards(userCards);
+		// 1秒間処理を止める
+		waitProcess();
+		System.out.println(CardConst.MSG_FINISHED);
+		// 手札を表示する
+		printCards(userCards);
+
+		// COMのカードを精査する
+		comCards = clearCards(comCards);
+	}
+
+
+	/**
+	 * ユーザーのメニュー選択を処理する。
+	 * @return 選択されたメニュー番号
+	 */
+	private String handleMenuSelection() {
 		String line = null;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -40,77 +133,33 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 					System.out.println(CardConst.MSG_SEQ_NUM);
 				}
 			}
-
-			if("1".equals(line)) {
-				// １を選択された場合、ゲーム
-				game();
-			} else if("2".equals(line)) {
-				// 2を選択された場合
-				System.out.println(CardConst.MSG_SEE_RESULTS);
-				Result r = new Result();
-				String message = r.getGameResults(CardConst.GAME_RESULT_FILE);
-				System.out.println(message);
-
-			} else {
-				// それ以外(3を選択された場合）
-				System.out.println(CardConst.MSG_EXIT_AP);
-			}
 		} catch (IOException e) {
-			// 本課題では例外時の処理を考慮しない
+			System.out.println(CardConst.MSG_SEQ_NUM);
 		}
+		return line;
 	}
 
-	@Override
-	public void game() {
-		System.out.println(CardConst.MSG_GAME_START);
-		System.out.println(CardConst.MSG_BABANUKI_START);
-		
-		// トランプを配る
-		handOutTrump();
-		// 手札を表示する
-		printCards(userCards);
-
-		System.out.print("カード精査中...");
-		userCards = clearCards(userCards);
-		// 1秒間処理を止める
-		waitProcess();
-		System.out.println(CardConst.MSG_FINISHED);
-		// 手札を表示する
-		printCards(userCards);
-
-		// COMのカードを精査する
-		comCards = clearCards(comCards);
-		Result r = new Result();
-		int flag = -1;
-		while(true) {
-			// ユーザーのターン
-			userTurn();
-			// 勝敗をチェック
-			flag = r.checkResult(userCards, comCards);
-			if(flag == 0 || flag == 1) {
-				// 勝敗が決定したのでループから抜ける
-				break;
-			}
-			// 手札を表示
-			printCards(userCards);
-
-			// COMのターン
-			comTurn();
-			// 勝敗をチェック
-			flag = r.checkResult(userCards, comCards);
-			if(flag == 0 || flag == 1) {
-				// 勝敗が決定したのでループから抜ける
-				break;
-			}
-			// 手札を表示
-			printCards(userCards);
-		}
-		// TODO 結果をファイルに書き出す
-		r.printResult(flag);
+	/** 
+	 * ゲームを開始する。
+	 */
+	private void handleGameStart() {
+		game();
 	}
-	
+
 	/**
-	 * １秒間処理をストップ
+	 * 結果を表示する。
+	 */
+	private void handleResults() {
+		System.out.println(CardConst.MSG_SEE_RESULTS);
+		Result r = new Result();
+		String message = r.getGameResults(CardConst.GAME_RESULT_FILE);
+		System.out.println(message);
+
+	}
+
+
+	/**
+	 * １秒間処理をストップ。
 	 */
 	private void waitProcess() {
 		try {
@@ -122,20 +171,16 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		}
 	}
 	/**
-	 * アプリケーションの起動メッセージを表す文字列を返します。
+	 * アプリケーションの起動メッセージを表す文字列を返す。
 	 * @param version バージョン
 	 * @return 起動メッセージ
 	 */
-	private String createStartMsg(String version) {
+	private String createStartMsg() {
 		StringBuilder startMsg = new StringBuilder();
-		startMsg.append(CardConst.MSG_APP_START);
-		startMsg.append("\n");
-		startMsg.append(CardConst.MSG_APP_START_1);
-		startMsg.append("\n");
-		startMsg.append(CardConst.MSG_APP_START_2);
-		startMsg.append("\n");
-		startMsg.append(CardConst.MSG_APP_START_3);
-		startMsg.append("\n");
+		startMsg.append(CardConst.MSG_APP_START).append("\n");;
+		startMsg.append(CardConst.MSG_APP_START_1).append("\n");
+		startMsg.append(CardConst.MSG_APP_START_2).append("\n");
+		startMsg.append(CardConst.MSG_APP_START_3).append("\n");
 		return startMsg.toString();
 	}
 
@@ -174,7 +219,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		System.out.println(CardConst.MSG_FINISHED);
 	}
 	/**
-	 * カードを精査する（重複を削除する）
+	 * カードを精査する（重複を削除する）。
 	 * @param cards 手札
 	 * @return 重複を削除した手札
 	 */
@@ -214,7 +259,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	}
 
 	/**
-	 * 手札を表示する
+	 * 手札を表示する。
 	 * @param cards　手札
 	 */
 	private void printCards(List<String> cards) {
@@ -227,12 +272,18 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 
 	/**
 	 * ユーザーのターン
+	 * @param r 結果クラス
 	 */
-	private void userTurn() {
+	private void userTurn(Result r) {
+		// どちらかのカードがなければ、処理終了
+		if(checkGameOver(r)) { 
+			return ;
+		}
+		
 		System.out.println(CardConst.MSG_TURN_USER);
 		// COMの手札の一覧を生成し、表示する
 		printCOMCardsList();
-		
+
 
 		String line = null;
 		int selected = 0;
@@ -252,7 +303,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 				}
 				String msg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
 				System.out.println(msg);
-				
+
 			}
 		} catch (IOException e) {
 			// 本課題では例外時の処理を考慮しない
@@ -267,9 +318,15 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	}
 
 	/**
-	 * COMのターン
+	 * COMのターン。
+	 * @param r 結果クラス
 	 */
-	private void comTurn() {
+	private void comTurn(Result r) {
+		// どちらかのカードがなければ、処理終了
+		if(checkGameOver(r)) { 
+			return ;
+		}
+		
 		System.out.println(CardConst.MSG_TURN_COM);
 		System.out.println(CardConst.MSG_SELECT_CARD);
 		int selected =  (int) (Math.random() * userCards.size());
@@ -280,48 +337,68 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		System.out.println(CardConst.MSG_FINISHED);
 		userCards.remove(selected);
 		comCards.add(selectedCard);
-		
+
 		// 手札を精査する
 		comCards = clearCards(comCards);
 		Collections.shuffle(comCards);
 	}
-	
+
 	/**
-	 * COMの手札の一覧を作成
+	 * COMの手札の一覧を作成する。
 	 * @return メッセージ
 	 */
 	private void printCOMCardsList() {
-
 		System.out.println(CardConst.MSG_SLECT_COM_CARD);
-		// 手札の一覧を生成
+
+		// 手札のサイズを取得
+		int cardCount = comCards.size();
+
+		// 手札の一覧を表示するためのメッセージを構築
 		StringBuilder comCardsList = new StringBuilder();
-		for (int i = 0; i < comCards.size(); i++) {
-			comCardsList.append("+----+ ");
-		}
-		comCardsList.append("\n");
 
-		for (int i = 0; i < comCards.size(); i++) {
-			comCardsList.append("|    | ");
-		}
-		comCardsList.append("\n");
+		// 上部の枠を追加
+		appendRepeatedMessage(comCardsList, cardCount, "+----+ ");
+		appendNewLine(comCardsList);
 
-		for (int i = 0; i < comCards.size(); i++) {
-			// 数字を中央揃えにするために3桁分のスペースを確保してフォーマット
-		    comCardsList.append(String.format("| %2d | ", i + 1));  // 右揃えを使用して中央に表示される
-		}
-		comCardsList.append("\n");
+		// 空白の枠を追加
+		appendRepeatedMessage(comCardsList, cardCount, "|    | ");
+		appendNewLine(comCardsList);
 
-		for (int i = 0; i < comCards.size(); i++) {
-			comCardsList.append("|    | ");
+		// 番号を中央に配置
+		for (int i = 0; i < cardCount; i++) {
+			comCardsList.append(String.format("| %2d | ", i + 1)); // 番号を右揃えで表示
 		}
-		comCardsList.append("\n");
+		appendNewLine(comCardsList);
 
-		for (int i = 0; i < comCards.size(); i++) {
-			comCardsList.append("+----+ ");
-		}
-		comCardsList.append("\n");
-		
-		// 手札の一覧を表示する
+		// 空白の枠を追加
+		appendRepeatedMessage(comCardsList, cardCount, "|    | ");
+		appendNewLine(comCardsList);
+
+		// 下部の枠を追加
+		appendRepeatedMessage(comCardsList, cardCount, "+----+ ");
+		appendNewLine(comCardsList);
+
+		// 完成した一覧を表示
 		System.out.println(comCardsList.toString());
+	}
+
+	/**
+	 * StringBuilder に繰り返しメッセージを追加
+	 * @param sb StringBuilder
+	 * @param count 繰り返し回数
+	 * @param message 追加するメッセージ
+	 */
+	private void appendRepeatedMessage(StringBuilder sb, int count, String message) {
+		for (int i = 0; i < count; i++) {
+			sb.append(message);
+		}
+	}
+
+	/**
+	 * 新しい行を追加
+	 * @param sb StringBuilder
+	 */
+	private void appendNewLine(StringBuilder sb) {
+		sb.append("\n");
 	}
 }

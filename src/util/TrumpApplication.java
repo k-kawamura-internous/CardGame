@@ -8,7 +8,7 @@ import app.Babanuki;
  */
 public class TrumpApplication {
 	/**
-	 * 起動用メイン
+	 * 起動用メイン。
 	 *
 	 * @param String[] args
 	 * @return なし

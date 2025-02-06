@@ -63,7 +63,8 @@ public final class CardConst {
 	public static final String MSG_SELECT_CARD = "カード選択中...";
 	/** 表示メッセージ：COMのカードを選択メッセージ。 */
 	public static final String MSG_SELECT_CARD_NO = "1～Xの数字で指定してください";
-
+	/** 表示メッセージ：カード精査中メッセージ。 */
+	public static final String MSG_CLEAR_CARD = "カード精査中...";
 	/** 表示メッセージ：ターンメッセージ(USER)。 */
 	public static final String MSG_TURN_USER = "USER'S TURN.";
 	/** 表示メッセージ：ターンメッセージ(COM)。 */
