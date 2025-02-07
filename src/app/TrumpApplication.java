@@ -1,6 +1,4 @@
-package util;
-
-import app.Babanuki;
+package app;
 
 /**
  * トランプゲーム用の起動クラス。
