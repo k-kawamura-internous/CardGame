@@ -30,21 +30,21 @@ public class CardsUtils {
 		// ユーザーとCOMにカードを配る
 		userCards.addAll(cards.subList(0, CardConst.CARD_NUM_HALF));
 		comCards.addAll(cards.subList(CardConst.CARD_NUM_HALF, CardConst.CARD_NUM_MAX));
-
-		// 
-		Map<String, List<String>> cardsMap = new HashMap<>();
-		cardsMap.put("userCards", userCards);
-		cardsMap.put("comCards", comCards);
 		
 		// ジョーカーを配る
 		int randomInt = (int) (Math.random() * 2);
 		if (randomInt == 0) {
 			userCards.add(CardConst.TRUMP_CALL_JOKER);
-			Collections.shuffle(comCards);
+			Collections.shuffle(userCards);
 		} else {
 			comCards.add(CardConst.TRUMP_CALL_JOKER);
 			Collections.shuffle(comCards);
 		}
+		
+		// ユーザーとCOMに分けた手札をMapに格納する
+		Map<String, List<String>> cardsMap = new HashMap<>();
+		cardsMap.put("userCards", userCards);
+		cardsMap.put("comCards", comCards);
 
 		// 1秒間処理を止める
 		waitProcess(1000);
@@ -71,6 +71,7 @@ public class CardsUtils {
 					.replace(CardConst.TRUMP_CALL_JOKER, "");
 
 			boolean isFound = false;
+			// 重複を削除した手札に同じ数字のカードがないかチェックする
 			for (int i = 0; i < uniqueCards.size(); i++) {
 				String c = uniqueCards.get(i);
 				String filtered = c.replace(CardConst.TRUMP_CALL_HEART, "")
@@ -79,12 +80,17 @@ public class CardsUtils {
 						.replace(CardConst.TRUMP_CALL_CLOVER, "")
 						.replace(CardConst.TRUMP_CALL_JOKER, "");
 
+				// 同じ数字のカードが見つかった場合
 				if (filtered.equals(filteredCard)) {
+					// 重複を削除した手札から削除する
 					uniqueCards.remove(i);
 					isFound = true;
 					break;
 				}
 			}
+			
+			// 同じ数字のカードが見つ駆らなかった場合、
+			// 重複を削除した手札にカードを追加
 			if (!isFound) {
 				uniqueCards.add(card);
 			}
@@ -105,7 +111,7 @@ public class CardsUtils {
 	}
 
 	/**
-	 * 1秒間処理をストップ。
+	 * 指定の秒数処理を停止する。
 	 * @param seconds 秒数
 	 */
 	public static void waitProcess(int seconds) {

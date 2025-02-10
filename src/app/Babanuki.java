@@ -24,15 +24,20 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 
 	@Override
 	public void execute() {
+		// メニューを表示する
 		String startMsg = createStartMsg();
 		System.out.println(startMsg);
+		// ユーザーにメニューを選択させる
 		String line = handleMenuSelection();
 
 		if ("1".equals(line)) {
+			//ババ抜きを開始する
 			handleGameStart();
 		} else if ("2".equals(line)) {
+			// ゲームの結果を表示する
 			handleResults();
 		} else {
+			// ゲームを終了する
 			System.out.println(CardConst.MSG_EXIT_AP);
 		}
 	}
@@ -53,13 +58,16 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		CardsUtils.printCards(userCards);
 		CardsUtils.waitProcess(1500);
 		
-		// カードを精査する
+		// ユーザーのカードを精査する
 		System.out.print(CardConst.MSG_CLEAR_CARD);
 		userCards = CardsUtils.clearCards(userCards);
+
+		// COMのカードを精査する
+		comCards = CardsUtils.clearCards(comCards);
+
 		CardsUtils.waitProcess(1000);
 		System.out.println(CardConst.MSG_FINISHED);
-		
-		comCards = CardsUtils.clearCards(comCards);
+
 
 		// カード情報を表示する
 		CardsUtils.printCards(userCards);
@@ -67,20 +75,21 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		
 		
 		// ゲームが終わるまでターンを繰り返す
-		while (true) {
-			playTurn();
-			if (checkGameOver()) {
-				break;
-			}
+		boolean isGameOver = false;
+		while (!isGameOver) {
+			isGameOver = playTurn();
 		}
 		
 		// 結果を取得する
 		int result = Result.checkResult(userCards, comCards);
 		boolean isWin = Result.checkWin(result);
 		
-		// 結果をファイルに書き出す
+		// 今回の結果を今までの記録に加算し、取得する
 		String resultsMsg = Result.getResult(isWin);
+		// 結果をファイルに書き出す
 		FileUtils.setGameResults(CardConst.GAME_RESULT_FILE, resultsMsg);
+		
+		System.out.println(CardConst.MSG_GAME_END);
 	}
 
 	/**
@@ -94,29 +103,43 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 
 	/**
 	 * ゲームのターンを管理する。
+	 * @return true:ゲーム終了,false:ゲーム続行
 	 */
-	private void playTurn() {
+	private boolean playTurn() {
+
+		boolean isGameOver = checkGameOver();
+		// ユーザー、COMどちらかの手札がなければ終了
+		if (isGameOver) return true;
+		
 		// ユーザーのターン
-		playUserTurn();
-		CardsUtils.printCards(userCards);
+		isGameOver = playUserTurn();
+		//ユーザー、COMどちらかの手札がなければ終了
+		if(isGameOver) return true;
+		
 		// COMのターン
-		playComTurn();
-		CardsUtils.printCards(userCards);
+		isGameOver = playComTurn();
+		//ユーザー、COMどちらかの手札がなければ終了
+		if(isGameOver) return true;
+		
+		return false;
 	}
 
 	
 	/**
-	 * 	ゲームメニューを選択する。
+	 * ゲームメニューをユーザーに選択させる。
+	 * @return ユーザーが選択したメニュー
 	 */
 	private String handleMenuSelection() {
 		String line = null;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			// 1～3が入力されるまで繰り返す
 			while (true) {
 				line = reader.readLine();
 				if ("1".equals(line) || "2".equals(line) || "3".equals(line)) {
 					break;
 				} else {
+					// 1～3以外の数字が入力された場合
 					System.out.println(CardConst.MSG_SEQ_NUM);
 				}
 			}
@@ -138,70 +161,103 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	 */
 	private void handleResults() {
 		System.out.println(CardConst.MSG_SEE_RESULTS);
+		// ファイルからゲームの結果を読み込む
 		String gameResultsMsg = FileUtils.getGameResults(CardConst.GAME_RESULT_FILE);
 		System.out.println(gameResultsMsg);
 	}
 
 	/**
 	 * ユーザーのターン。
+	 * @return true:ゲーム終了,false:ゲーム続行
 	 */
-	private void playUserTurn() {
-		if (checkGameOver()) return;
+	private boolean playUserTurn() {
 		System.out.println(CardConst.MSG_TURN_USER);
+		//COMの手札を出力
 		CardsUtils.printCOMCardsList(comCards);
 
 		String line = null;
 		int selected = 0;
+		
+		// 手札の番号のリストを生成
+		List<Integer> cardNoList = new ArrayList<>();
+		for (int i = 0; i < comCards.size(); i++) {
+			cardNoList.add(i + 1);
+		}
+		// とるカードを選択
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
 				line = reader.readLine();
-				List<Integer> cardNoList = new ArrayList<>();
-				for (int i = 0; i < comCards.size(); i++) {
-					cardNoList.add(i + 1);
-				}
 				
 				try {
 					selected = Integer.parseInt(line);
-					if (cardNoList.contains(selected)) {
+					// 選択された数字が手札の番号のリストに含まれていたら、処理終了
+					if (selected >= 1 && selected <= comCards.size()) {
 						break;
 					}
-				} catch(NumberFormatException e) {
-					//この後の処理でメッセージを出すので、ここでは出さない
+					// 手札の番号以外を入力された場合、メッセージを出力
+					String selectMsg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
+					System.out.println(selectMsg);
 					
+				} catch(NumberFormatException e) {
+					// 手札の番号以外を入力された場合、メッセージを出力
+					String selectMsg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
+					System.out.println(selectMsg);
 				}
-			
-				String msg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
-				System.out.println(msg);
 			}
 		} catch (IOException e) {
 			System.out.println(CardConst.ERR_MSG_INPUT);
 		}
 
+		// 選択したカードをCOMの手札から移動させる
 		String selectedCard = comCards.get(selected - 1);
 		comCards.remove(selected - 1);
 		userCards.add(selectedCard);
+		
+		// カードを精査する
 		userCards = CardsUtils.clearCards(userCards);
 		Collections.shuffle(userCards);
+		
+		// ゲーム終了か判定
+		if(checkGameOver()) {
+			return true;
+		}
+		
+		// ユーザーの手札を表示
+		CardsUtils.printCards(userCards);
+		return false;
 	}
 
 	/**
 	 * COMのターン。
+	 * @return true:ゲーム終了,false:ゲーム続行
 	 */
-	private void playComTurn() {
-		if (checkGameOver()) return;
+	private boolean playComTurn() {
 		System.out.println(CardConst.MSG_TURN_COM);
-		System.out.println(CardConst.MSG_SELECT_CARD);
+		System.out.print(CardConst.MSG_SELECT_CARD);
+		
+		// とるカードを選択
 		int selected = (int) (Math.random() * userCards.size());
 		String selectedCard = userCards.get(selected);
-
 		CardsUtils.waitProcess(1000);
 		System.out.println(CardConst.MSG_FINISHED);
+		
+		// 選択したカードをユーザーの手札から移動させる
 		userCards.remove(selected);
 		comCards.add(selectedCard);
 
+		// カードを精査する
 		comCards = CardsUtils.clearCards(comCards);
 		Collections.shuffle(comCards);
+
+		// ゲーム終了か判定
+		if(checkGameOver()) {
+			return true;
+		}
+		
+		// ユーザーの手札を表示
+		CardsUtils.printCards(userCards);
+		return false;
 	}
 
 	/**

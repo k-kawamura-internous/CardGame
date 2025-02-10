@@ -34,11 +34,10 @@ public class FileUtils {
 			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		}
 
-		if (record != null) {
-			return record;
-		} else {
+		if (record == null) {
 			return null;
 		}
+		return record;
 	}
 
 	/**
