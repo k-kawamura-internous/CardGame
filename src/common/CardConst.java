@@ -89,6 +89,8 @@ public final class CardConst {
 	public static final String ERR_MSG_FILE_IN = "ファイル読み込み時に不正な処理が行われました";
 	/** ファイル出力不正時メッセージ。 */
 	public static final String ERR_MSG_FILE_OUT = "ファイル書き込み時に不正な処理が行われました";
+	/** 入力の読み込み失敗時メッセージ */
+	public static final String ERR_MSG_INPUT = "入力の読み取りに失敗しました";
 	
 
 }

@@ -8,10 +8,15 @@ import java.util.Map;
 
 import common.CardConst;
 
+/**
+ * カードゲームのUtilsクラス
+ * @author K Kawamura
+ *
+ */
 public class CardsUtils {
 	/**
 	 * トランプをユーザーとCOMに配布する。
-	 * @return カードリスト
+	 * @return ユーザーとCOMの手札を入れたMap
 	 */
 	public static Map<String, List<String>> handOutTrump(List<String> userCards, List<String> comCards) {
 		System.out.print(CardConst.MSG_CARD_HAND_OUT);
@@ -49,13 +54,16 @@ public class CardsUtils {
 	}
 
 	/**
-	 * カードを精査する（重複を削除する）。
+	 * カードを精査する（同じ数字を削除する）。
 	 * @param cards 手札
-	 * @return 重複を削除した手札
+	 * @return 精査完了した手札
 	 */
 	public static List<String> clearCards(List<String> cards) {
+		// 重複を削除した手札
 		List<String> uniqueCards = new ArrayList<>();
 		for (String card : cards) {
+			
+			// カードのマークを削除
 			String filteredCard = card.replace(CardConst.TRUMP_CALL_HEART, "")
 					.replace(CardConst.TRUMP_CALL_DIAGRAM, "")
 					.replace(CardConst.TRUMP_CALL_SPADE, "")
@@ -98,7 +106,7 @@ public class CardsUtils {
 
 	/**
 	 * 1秒間処理をストップ。
-	 * @param seconds TODO
+	 * @param seconds 秒数
 	 */
 	public static void waitProcess(int seconds) {
 		try {
@@ -144,7 +152,7 @@ public class CardsUtils {
 	}
 
 	/**
-	 * StringBuilder に繰り返しメッセージを追加
+	 * StringBuilder に繰り返しメッセージを追加。
 	 * @param sb StringBuilder
 	 * @param count 繰り返し回数
 	 * @param message 追加するメッセージ
@@ -156,7 +164,7 @@ public class CardsUtils {
 	}
 
 	/**
-	 * 新しい行を追加
+	 * 新しい行を追加。
 	 * @param sb StringBuilder
 	 */
 	private static void appendNewLine(StringBuilder sb) {

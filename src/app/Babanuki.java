@@ -66,37 +66,48 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		CardsUtils.waitProcess(1500);
 		
 		
-		Result r = new Result();
 		// ゲームが終わるまでターンを繰り返す
 		while (true) {
-			playTurn(r);
-			if (checkGameOver(r)) {
+			playTurn();
+			if (checkGameOver()) {
 				break;
 			}
 		}
-
+		
+		// 結果を取得する
+		int result = Result.checkResult(userCards, comCards);
+		boolean isWin = Result.checkWin(result);
+		
 		// 結果をファイルに書き出す
-		String message = r.getResult(r.checkResult(userCards, comCards));
-		FileUtils.setGameResults(CardConst.GAME_RESULT_FILE, message);
+		String resultsMsg = Result.getResult(isWin);
+		FileUtils.setGameResults(CardConst.GAME_RESULT_FILE, resultsMsg);
 	}
 
 	/**
-	 * ゲームが終了しているか確認する
-	 * @param r 結果クラス
+	 * ゲームが終了しているか確認する。
 	 * @return true:ゲーム終了,false:ゲーム続行
 	 */
-	private boolean checkGameOver(Result r) {
-		int finishedFlag = r.checkResult(userCards, comCards);
-		return finishedFlag == 0 || finishedFlag == 1;
+	private boolean checkGameOver() {
+		int result = Result.checkResult(userCards, comCards);
+		return result == 0 || result == 1;
 	}
 
-	private void playTurn(Result r) {
-		userTurn(r);
+	/**
+	 * ゲームのターンを管理する。
+	 */
+	private void playTurn() {
+		// ユーザーのターン
+		playUserTurn();
 		CardsUtils.printCards(userCards);
-		comTurn(r);
+		// COMのターン
+		playComTurn();
 		CardsUtils.printCards(userCards);
 	}
 
+	
+	/**
+	 * 	ゲームメニューを選択する。
+	 */
 	private String handleMenuSelection() {
 		String line = null;
 		try {
@@ -110,23 +121,32 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(CardConst.MSG_SEQ_NUM);
+			System.out.println(CardConst.ERR_MSG_INPUT);
 		}
 		return line;
 	}
 
+	/**
+	 * ババ抜きゲームを開始する。
+	 */
 	private void handleGameStart() {
 		game();
 	}
 
+	/**
+	 * ゲームの結果を参照する。
+	 */
 	private void handleResults() {
 		System.out.println(CardConst.MSG_SEE_RESULTS);
-		String message = FileUtils.getGameResults(CardConst.GAME_RESULT_FILE);
-		System.out.println(message);
+		String gameResultsMsg = FileUtils.getGameResults(CardConst.GAME_RESULT_FILE);
+		System.out.println(gameResultsMsg);
 	}
 
-	private void userTurn(Result r) {
-		if (checkGameOver(r)) return;
+	/**
+	 * ユーザーのターン。
+	 */
+	private void playUserTurn() {
+		if (checkGameOver()) return;
 		System.out.println(CardConst.MSG_TURN_USER);
 		CardsUtils.printCOMCardsList(comCards);
 
@@ -136,19 +156,26 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
 				line = reader.readLine();
-				List<Integer> list = new ArrayList<>();
+				List<Integer> cardNoList = new ArrayList<>();
 				for (int i = 0; i < comCards.size(); i++) {
-					list.add(i + 1);
+					cardNoList.add(i + 1);
 				}
-				selected = Integer.parseInt(line);
-				if (list.contains(selected)) {
-					break;
+				
+				try {
+					selected = Integer.parseInt(line);
+					if (cardNoList.contains(selected)) {
+						break;
+					}
+				} catch(NumberFormatException e) {
+					//この後の処理でメッセージを出すので、ここでは出さない
+					
 				}
+			
 				String msg = CardConst.MSG_SELECT_CARD_NO.replaceAll("X", String.valueOf(comCards.size()));
-				System.out.print(msg);
+				System.out.println(msg);
 			}
 		} catch (IOException e) {
-			// 例外処理
+			System.out.println(CardConst.ERR_MSG_INPUT);
 		}
 
 		String selectedCard = comCards.get(selected - 1);
@@ -158,8 +185,11 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		Collections.shuffle(userCards);
 	}
 
-	private void comTurn(Result r) {
-		if (checkGameOver(r)) return;
+	/**
+	 * COMのターン。
+	 */
+	private void playComTurn() {
+		if (checkGameOver()) return;
 		System.out.println(CardConst.MSG_TURN_COM);
 		System.out.println(CardConst.MSG_SELECT_CARD);
 		int selected = (int) (Math.random() * userCards.size());
@@ -174,6 +204,10 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		Collections.shuffle(comCards);
 	}
 
+	/**
+	 * 実行時に出力するメッセージを取得する。
+	 * @return 実行時に出力するメッセージ
+	 */
 	private String createStartMsg() {
 		StringBuilder startMsg = new StringBuilder();
 		startMsg.append(CardConst.MSG_APP_START).append("\n");

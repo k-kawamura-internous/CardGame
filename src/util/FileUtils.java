@@ -6,6 +6,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import common.CardConst;
+
+/**
+ * ファイルの入出力のUtilsクラス。
+ * @author K Kawamura
+ *
+ */
 public class FileUtils {
 	/**
 	 * 成績ファイルから成績を表す文字列を取得して、返す。
@@ -21,11 +28,10 @@ public class FileUtils {
 			reader = new BufferedReader(new FileReader(fileName));
 			record = reader.readLine();
 		} catch (FileNotFoundException e) {
-			// 本課題では例外処理を行わないため、ここで例外をキャッチする
-			e.printStackTrace();
+			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		} catch (IOException e) {
-			// 本課題では例外処理を行わないため、ここで例外をキャッチする
-			e.printStackTrace();
+
+			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		}
 
 		if (record != null) {
@@ -49,8 +55,7 @@ public class FileUtils {
 			writer.close();
 
 		} catch (IOException e) {
-			// 本課題では例外処理を行わないため、ここで例外をキャッチする
-			e.printStackTrace();
+			System.out.println(CardConst.ERR_MSG_FILE_OUT);
 		}
 	}
 
