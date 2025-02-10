@@ -178,11 +178,6 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		String line = null;
 		int selected = 0;
 		
-		// 手札の番号のリストを生成
-		List<Integer> cardNoList = new ArrayList<>();
-		for (int i = 0; i < comCards.size(); i++) {
-			cardNoList.add(i + 1);
-		}
 		// とるカードを選択
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
