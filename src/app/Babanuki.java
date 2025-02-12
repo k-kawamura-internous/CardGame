@@ -21,6 +21,8 @@ import util.Result;
 public class Babanuki implements GameInterface  {// GameInterfaceをオーバーライド
 	private List<String> userCards;
 	private List<String> comCards;
+	
+	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
 	@Override
 	public void execute() {
@@ -132,7 +134,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	private String handleMenuSelection() {
 		String line = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			
 			// 1～3が入力されるまで繰り返す
 			while (true) {
 				line = reader.readLine();
@@ -179,9 +181,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		int selected = 0;
 		
 		// とるカードを選択
-		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
 				line = reader.readLine();
 				
