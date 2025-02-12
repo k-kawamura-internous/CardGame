@@ -179,8 +179,9 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		int selected = 0;
 		
 		// とるカードを選択
+		BufferedReader reader = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			reader = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
 				line = reader.readLine();
 				
@@ -215,6 +216,15 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 		
 		// ゲーム終了か判定
 		if(checkGameOver()) {
+			//BufferedReaderをクローズする
+			try {
+				if(reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+				System.out.println(CardConst.ERR_MSG_CLOSE);
+			}
+			
 			return true;
 		}
 		

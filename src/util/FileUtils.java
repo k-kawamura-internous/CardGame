@@ -27,6 +27,8 @@ public class FileUtils {
 		try {
 			reader = new BufferedReader(new FileReader(fileName));
 			record = reader.readLine();
+			
+			
 		} catch (FileNotFoundException e) {
 			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		} catch (IOException e) {
@@ -34,6 +36,15 @@ public class FileUtils {
 			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		}
 
+		if(reader != null) {
+			// BufferedReaderをクローズする
+	        try {
+				reader.close();
+			} catch (IOException e) {
+				System.out.println(CardConst.ERR_MSG_CLOSE);
+			}
+		}
+		
 		if (record == null) {
 			return null;
 		}
