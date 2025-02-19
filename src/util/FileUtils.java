@@ -27,24 +27,22 @@ public class FileUtils {
 		try {
 			reader = new BufferedReader(new FileReader(fileName));
 			record = reader.readLine();
-			
-			
 		} catch (FileNotFoundException e) {
 			System.out.println(CardConst.ERR_MSG_FILE_IN);
 		} catch (IOException e) {
 
 			System.out.println(CardConst.ERR_MSG_FILE_IN);
-		}
-
-		if(reader != null) {
-			// BufferedReaderをクローズする
-	        try {
-				reader.close();
-			} catch (IOException e) {
-				System.out.println(CardConst.ERR_MSG_CLOSE);
+		} finally {
+			if(reader != null) {
+				// BufferedReaderをクローズする
+				try {
+					reader.close();
+				} catch (IOException e) {
+					System.out.println(CardConst.ERR_MSG_CLOSE);
+				}
 			}
 		}
-		
+
 		if (record == null) {
 			return null;
 		}
@@ -62,11 +60,16 @@ public class FileUtils {
 		try {
 			writer = new FileWriter(fileName);
 			writer.write(resultsMsg);
-			writer.close();
-
 		} catch (IOException e) {
 			System.out.println(CardConst.ERR_MSG_FILE_OUT);
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					System.out.println(CardConst.ERR_MSG_CLOSE);
+				}
+			}
 		}
 	}
-
 }
