@@ -36,7 +36,7 @@ public final class CardConst {
 	/** カード枚数。 */
 	public static final int CARD_NUM_HALF = 26;
 	/** アプリスタートメッセージ*/
-	public static final String MSG_APP_START = "実行した処理の番号を選んでください";
+	public static final String MSG_APP_START = "実行した処理の番号を選んでください: ";
 	/** アプリスタートメッセージ*/
 	public static final String MSG_APP_START_1 = "1:ババ抜きを始める";
 	/** アプリスタートメッセージ*/
@@ -71,7 +71,7 @@ public final class CardConst {
 	public static final String MSG_TURN_COM = "COM'S TURN.";
 	
 	/** 表示メッセージ：COMのカードを選択するメッセージ。 */
-	public static final String MSG_SLECT_COM_CARD = "COM側のカード番号を選択してください";
+	public static final String MSG_SLECT_COM_CARD = "COM側のカード番号を選択してください: ";
 	
 	/** 表示メッセージ：勝利時メッセージ。 */
 	public static final String MSG_WIN = "USERの勝利です";

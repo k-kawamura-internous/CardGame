@@ -128,7 +128,6 @@ public class CardsUtils {
 	 * @return メッセージ
 	 */
 	public static void printCOMCardsList(List<String> comCards) {
-		System.out.println(CardConst.MSG_SLECT_COM_CARD);
 		int cardCount = comCards.size();
 		StringBuilder comCardsList = new StringBuilder();
 
@@ -155,6 +154,8 @@ public class CardsUtils {
 		appendNewLine(comCardsList);
 
 		System.out.println(comCardsList.toString());
+
+		System.out.print(CardConst.MSG_SLECT_COM_CARD);
 	}
 
 	/**

@@ -28,7 +28,7 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	public void execute() {
 		// メニューを表示する
 		String startMsg = createStartMsg();
-		System.out.println(startMsg);
+		System.out.print(startMsg);
 		// ユーザーにメニューを選択させる
 		String line = handleMenuSelection();
 
@@ -271,10 +271,10 @@ public class Babanuki implements GameInterface  {// GameInterfaceをオーバー
 	 */
 	private String createStartMsg() {
 		StringBuilder startMsg = new StringBuilder();
-		startMsg.append(CardConst.MSG_APP_START).append("\n");
 		startMsg.append(CardConst.MSG_APP_START_1).append("\n");
 		startMsg.append(CardConst.MSG_APP_START_2).append("\n");
 		startMsg.append(CardConst.MSG_APP_START_3).append("\n");
+		startMsg.append(CardConst.MSG_APP_START);
 		return startMsg.toString();
 	}
 }
